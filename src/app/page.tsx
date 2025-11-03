@@ -55,15 +55,7 @@ export default function Home() {
     setPredictionResult(null);
     form.clearErrors();
 
-    // The schema already transforms the data, but the API expects lat/long
-    // For now, let's add some default coordinates since the map is gone.
-    const dataWithCoords = {
-      ...data,
-      latitude: -22.9068,
-      longitude: -43.1729,
-    };
-
-    const validatedApiData = apiPredictionSchema.safeParse(dataWithCoords);
+    const validatedApiData = apiPredictionSchema.safeParse(data);
 
     if (!validatedApiData.success) {
       console.error("API validation failed", validatedApiData.error.flatten().fieldErrors);
@@ -119,6 +111,7 @@ export default function Home() {
           acc[key as keyof PredictionResponse['probabilidades']] = parseFloat(value) / 100;
           return acc;
         }, {} as PredictionResponse['probabilidades']),
+        // The LIME explanation now comes in the correct format directly from the API
         explicacao_LIME: apiResult.resultado.explicacao_LIME,
       };
 

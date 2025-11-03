@@ -3,8 +3,6 @@ export type HostResponseType = 'within an hour' | 'within a few hours' | 'within
 
 export type PredictionInput = {
   api_url: string;
-  latitude: number;
-  longitude: number;
   room_type: RoomType;
   accommodates: number;
   bathrooms: number;
@@ -32,13 +30,29 @@ export type PredictionInput = {
   property_type: string;
 };
 
+// This represents a single item in the LIME explanation
+export type LIMEExplanationItem = {
+  feature: string;
+  rotulo: string;
+  grupo: string;
+  valor: number | string;
+  impacto: number;
+  direcao: string;
+};
+
+// This represents the LIME explanation object from the API
+export type LIMEExplanation = {
+  itens: LIMEExplanationItem[];
+  cobertura_pct: number;
+};
+
 // This is the raw response from the Python API
 export type ApiPredictionResponse = {
   status: string;
   resultado: {
     classe_prevista: 'baixo' | 'medio' | 'luxo';
     confianca: string;
-    explicacao_LIME: [string, number][];
+    explicacao_LIME: LIMEExplanation;
     probabilidades: {
       baixo: string;
       medio: string;
@@ -57,5 +71,5 @@ export type PredictionResponse = {
     medio: number;
     luxo: number;
   };
-  explicacao_LIME: [string, number][];
+  explicacao_LIME: LIMEExplanation;
 };

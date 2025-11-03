@@ -30,10 +30,8 @@ export const predictionSchema = z.object({
 });
 
 // This schema is for validating the data just before sending it to the API
-export const apiPredictionSchema = predictionSchema.extend({
-  latitude: z.coerce.number().min(-90).max(90),
-  longitude: z.coerce.number().min(-180).max(180),
-}).transform((data) => ({
+// No need for lat/long anymore since the map is gone
+export const apiPredictionSchema = predictionSchema.transform((data) => ({
   ...data,
   host_response_rate: data.host_response_rate / 100,
   host_acceptance_rate: data.host_acceptance_rate / 100,
