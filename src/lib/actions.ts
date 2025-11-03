@@ -12,28 +12,6 @@ export type ActionState = {
   } | null;
 }
 
-export async function getEnums(type: 'room_type' | 'host_response_time'): Promise<string[]> {
-  // In a real app, this would be in a .env file
-  const API_BASE_URL = 'http://127.0.0.1:8000';
-  try {
-    const response = await fetch(`${API_BASE_URL}/enums/${type}`);
-    if (!response.ok) {
-      console.error(`Failed to fetch ${type} enums: ${response.statusText}`);
-      // Return a default list on error to prevent crashing the form, and to allow UI-only dev
-      return type === 'room_type' 
-        ? ['Entire home/apt', 'Private room', 'Shared room', 'Hotel room'] 
-        : ['within an hour', 'within a few hours', 'within a day', 'a few days or more'];
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(`Network error fetching ${type} enums:`, error);
-    return type === 'room_type' 
-        ? ['Entire home/apt', 'Private room', 'Shared room', 'Hotel room'] 
-        : ['within an hour', 'within a few hours', 'within a day', 'a few days or more'];
-  }
-}
-
 export async function predictPriceClass(
   prevState: ActionState,
   formData: FormData

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { predictionSchema, type PredictionInput } from '@/lib/schemas';
 import { predictPriceClass, type ActionState } from '@/lib/actions';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,6 @@ import { Switch } from './ui/switch';
 import { Separator } from './ui/separator';
 
 interface PredictionFormProps {
-  roomTypes: string[];
-  responseTimes: string[];
   neighbourhoods: string[];
   propertyTypes: string[];
 }
@@ -32,7 +30,7 @@ const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | '
   { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -74.0060' },
   { name: 'accommodates', label: 'Accommodates', icon: Users, placeholder: 'e.g., 4', type: 'number' },
   { name: 'bathrooms', label: 'Bathrooms', icon: Bath, placeholder: 'e.g., 2', type: 'number' },
-  { name: 'bedrooms', label: 'Bedrooms', icon: BedDouble, placeholder: 'e.g., 3', type: 'number' },
+  { name: 'bedrooms', label: 'Bedrooms', icon: BedDouble, placeholder: 'e-g., 3', type: 'number' },
   { name: 'beds', label: 'Beds', icon: BedDouble, placeholder: 'e.g., 3', type: 'number' },
   { name: 'host_response_rate', label: 'Host Response Rate', icon: Percent, placeholder: '0-100', type: 'number' },
   { name: 'host_acceptance_rate', label: 'Host Acceptance Rate', icon: Percent, placeholder: '0-100', type: 'number' },
@@ -60,8 +58,11 @@ function SubmitButton() {
   );
 }
 
-export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, propertyTypes }: PredictionFormProps) {
+export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionFormProps) {
   const { toast } = useToast();
+  const [roomTypes, setRoomTypes] = useState<string[]>([]);
+  const [responseTimes, setResponseTimes] = useState<string[]>([]);
+
 
   const initialState: ActionState = { message: null, result: null, errors: null };
   const [state, formAction] = useFormState(predictPriceClass, initialState);
@@ -72,12 +73,12 @@ export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, prope
       api_url: 'http://127.0.0.1:8000',
       latitude: 40.7128,
       longitude: -74.0060,
-      room_type: roomTypes[0] || '',
+      room_type: '',
       accommodates: 2,
       bathrooms: 1,
       bedrooms: 1,
       beds: 1,
-      host_response_time: responseTimes[0] || '',
+      host_response_time: '',
       host_response_rate: 100,
       host_acceptance_rate: 100,
       host_listings_count: 1,
@@ -99,6 +100,58 @@ export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, prope
       property_type: propertyTypes[0] || 'Entire apartment',
     },
   });
+
+  const apiUrl = form.watch('api_url');
+
+  useEffect(() => {
+    const fetchEnums = async () => {
+      if (!apiUrl) return;
+
+      try {
+        const [roomTypeRes, responseTimeRes] = await Promise.all([
+          fetch(`${apiUrl}/enums/room_type`),
+          fetch(`${apiUrl}/enums/host_response_time`)
+        ]);
+
+        if (roomTypeRes.ok) {
+          const data = await roomTypeRes.json();
+          setRoomTypes(data);
+          if (data.length > 0) {
+            form.setValue('room_type', data[0]);
+          }
+        } else {
+            setRoomTypes(['Entire home/apt', 'Private room', 'Shared room', 'Hotel room']);
+            form.setValue('room_type', 'Entire home/apt');
+        }
+
+        if (responseTimeRes.ok) {
+          const data = await responseTimeRes.json();
+          setResponseTimes(data);
+           if (data.length > 0) {
+            form.setValue('host_response_time', data[0]);
+          }
+        } else {
+            setResponseTimes(['within an hour', 'within a few hours', 'within a day', 'a few days or more']);
+            form.setValue('host_response_time', 'within an hour');
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch enums", error);
+        toast({
+            variant: "destructive",
+            title: "Could not load API data",
+            description: `Could not connect to ${apiUrl}. Using default dropdown values.`,
+        });
+        setRoomTypes(['Entire home/apt', 'Private room', 'Shared room', 'Hotel room']);
+        form.setValue('room_type', 'Entire home/apt');
+        setResponseTimes(['within an hour', 'within a few hours', 'within a day', 'a few days or more']);
+        form.setValue('host_response_time', 'within an hour');
+      }
+    };
+
+    fetchEnums();
+  }, [apiUrl, form, toast]);
+
 
   useEffect(() => {
     if (state.message && !state.result) {
@@ -162,7 +215,7 @@ export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, prope
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center"><Home className="mr-2 h-4 w-4" />Room Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select room type" />
@@ -182,7 +235,7 @@ export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, prope
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center"><Clock className="mr-2 h-4 w-4" />Host Response Time</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select response time" />
