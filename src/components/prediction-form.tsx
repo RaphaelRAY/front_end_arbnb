@@ -27,11 +27,6 @@ interface PredictionFormProps {
   propertyTypes: string[];
 }
 
-const apiUrls = [
-  { label: 'Local (Python)', value: 'http://127.0.0.1:8000' },
-  { label: 'Cloud Run (Production)', value: 'https://your-cloud-run-url.a.run.app' },
-];
-
 const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability' | 'neighbourhood_cleansed' | 'property_type'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
   { name: 'latitude', label: 'Latitude', icon: MapPin, placeholder: 'e.g., 40.7128' },
   { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -74.0060' },
@@ -74,7 +69,7 @@ export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, prope
   const form = useForm<PredictionInput>({
     resolver: zodResolver(predictionSchema),
     defaultValues: {
-      api_url: apiUrls[0].value,
+      api_url: 'http://127.0.0.1:8000',
       latitude: 40.7128,
       longitude: -74.0060,
       room_type: roomTypes[0] || '',
@@ -150,16 +145,9 @@ export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, prope
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center"><Globe className="mr-2 h-4 w-4" />API Endpoint</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select API URL" />
-                        </SelectTrigger>
+                     <FormControl>
+                        <Input placeholder="Enter API URL" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {apiUrls.map(url => <SelectItem key={url.value} value={url.value}>{url.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
