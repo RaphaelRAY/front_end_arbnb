@@ -1,0 +1,105 @@
+'use client';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import type { PredictionResponse } from '@/lib/types';
+import { Lightbulb, TrendingUp, TrendingDown } from 'lucide-react';
+import React from 'react';
+
+interface PredictionResultsProps {
+  result: PredictionResponse | null;
+}
+
+const PriceBadge = ({ level }: { level: string }) => {
+  const colors: {[key: string]: string} = {
+    baixo: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100',
+    medio: 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100',
+    luxo: 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100',
+  }
+
+  return <Badge className={`text-lg capitalize px-4 py-1 border-2 ${colors[level] || colors['medio']}`}>{level}</Badge>
+}
+
+const LIMEExplanation = ({ explanation }: { explanation: string }) => {
+  const isPositive = !explanation.includes('<');
+  const Icon = isPositive ? TrendingUp : TrendingDown;
+  const color = isPositive ? 'text-green-600' : 'text-red-600';
+  
+  const cleaned = explanation.replace(/<|>/g, ' ').replace(/=/g, ' = ').replace(/<=/g, ' ≤ ').replace(/>=/g, ' ≥ ').trim();
+
+  return (
+    <li className="flex items-center gap-3 py-3">
+      <Icon className={`h-5 w-5 shrink-0 ${color}`} />
+      <code className="text-sm font-medium text-foreground/90 bg-muted/50 px-2 py-1 rounded">{cleaned}</code>
+    </li>
+  );
+}
+
+export function PredictionResults({ result }: PredictionResultsProps) {
+  return (
+    <Card className="shadow-lg sticky top-8 min-h-[500px] flex flex-col justify-center">
+        {result ? (
+          <div
+            key="results"
+            className="w-full animate-in fade-in-0 zoom-in-95 duration-500"
+          >
+            <CardHeader>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2">
+                <Lightbulb className="text-accent" />
+                Prediction Analysis
+              </CardTitle>
+              <CardDescription>Here's the breakdown of your listing's price class.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center p-6 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium text-muted-foreground mb-2">Predicted Price Class</p>
+                <PriceBadge level={result.predicao} />
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Class Probabilities</h3>
+                <div className="space-y-3">
+                  {Object.entries(result.probabilidades).sort((a,b) => b[1] - a[1]).map(([key, value]) => (
+                    <div key={key}>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium capitalize">{key}</span>
+                        <span className="text-sm font-semibold text-primary">{(value * 100).toFixed(1)}%</span>
+                      </div>
+                      <Progress value={value * 100} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Key Price Factors</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  These features had the biggest impact on the prediction, powered by LIME.
+                </p>
+                <ul className="divide-y divide-border -mt-2">
+                  {result.explicacao_LIME.map((exp, i) => <LIMEExplanation key={i} explanation={exp} />)}
+                </ul>
+              </div>
+            </CardContent>
+          </div>
+        ) : (
+          <div
+            key="placeholder"
+            className="flex flex-col items-center justify-center h-full text-center p-8"
+          >
+            <div className="mb-4 flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 text-primary">
+              <Lightbulb className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl font-semibold font-headline">Awaiting Your Input</h3>
+            <p className="mt-2 text-muted-foreground">
+              Fill out the form to see the AI-powered price prediction for your property.
+            </p>
+          </div>
+        )}
+    </Card>
+  );
+}
