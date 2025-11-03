@@ -3,6 +3,8 @@ export type HostResponseType = 'within an hour' | 'within a few hours' | 'within
 
 export type PredictionInput = {
   api_url: string;
+  latitude: number;
+  longitude: number;
   room_type: RoomType;
   accommodates: number;
   bathrooms: number;

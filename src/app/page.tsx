@@ -22,6 +22,8 @@ export default function Home() {
     resolver: zodResolver(predictionSchema),
     defaultValues: {
       api_url: 'http://127.0.0.1:8000',
+      latitude: -22.9697,
+      longitude: -43.1869,
       room_type: roomTypes[0],
       accommodates: 2,
       bathrooms: 1,

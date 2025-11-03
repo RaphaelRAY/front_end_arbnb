@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const predictionSchema = z.object({
   api_url: z.string().url("Invalid API URL"),
+  latitude: z.coerce.number(),
+  longitude: z.coerce.number(),
   room_type: z.string().min(1, "Room type is required"),
   accommodates: z.coerce.number().int().min(1, "Must accommodate at least 1 person"),
   bathrooms: z.coerce.number().min(0, "Bathrooms cannot be negative"),
