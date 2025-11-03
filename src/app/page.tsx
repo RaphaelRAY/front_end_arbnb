@@ -1,9 +1,10 @@
-import { PredictionForm } from '@/components/prediction-form';
+'use client';
+import { PredictionFormWrapper } from '@/app/prediction-form-wrapper';
 import { BrainCircuit } from 'lucide-react';
 import { neighbourhoods } from '@/lib/neighbourhoods';
 import { propertyTypes } from '@/lib/property-types';
 
-export default async function Home() {
+export default function Home() {
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
       <div className="flex flex-col items-center text-center mb-12">
@@ -18,7 +19,7 @@ export default async function Home() {
         </p>
       </div>
       
-      <PredictionForm
+      <PredictionFormWrapper
         neighbourhoods={neighbourhoods}
         propertyTypes={propertyTypes}
       />
