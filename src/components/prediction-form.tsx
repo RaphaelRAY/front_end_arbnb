@@ -1,11 +1,11 @@
 'use client';
 
-import { useActionState, useFormStatus } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { predictionSchema, type PredictionInput } from '@/lib/schemas';
 import { predictPriceClass, type ActionState } from '@/lib/actions';
-import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -34,8 +34,8 @@ const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | '
   { name: 'beds', label: 'Beds', icon: BedDouble, placeholder: 'e.g., 3', type: 'number' },
   { name: 'host_response_rate', label: 'Host Response Rate', icon: Percent, placeholder: '0-100', type: 'number' },
   { name: 'host_acceptance_rate', label: 'Host Acceptance Rate', icon: Percent, placeholder: '0-100', type: 'number' },
-  { name: 'host_listings_count', label: 'Host Listings', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
-  { name: 'host_total_listings_count', label: 'Host Total Listings', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'host_listings_count', label: 'Anúncios Ativos do Anfitrião', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'host_total_listings_count', label: 'Total de Anúncios do Anfitrião', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
   { name: 'minimum_nights', label: 'Minimum Nights', icon: Calendar, placeholder: 'e.g., 1', type: 'number' },
   { name: 'maximum_nights', label: 'Maximum Nights', icon: Calendar, placeholder: 'e.g., 30', type: 'number' },
   { name: 'minimum_minimum_nights', label: 'Min Minimum Nights', icon: Calendar, placeholder: 'e.g., 1', type: 'number' },
@@ -324,3 +324,5 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
     </div>
   );
 }
+
+    
