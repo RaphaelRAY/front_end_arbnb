@@ -158,10 +158,10 @@ export function PredictionFormWrapper({ neighbourhoods, propertyTypes }: Predict
           isSubmitting={isSubmitting}
         />
         <div className="space-y-8">
-          <div className="sticky top-8">
-            <InteractiveMap />
-          </div>
-          <PredictionResults result={predictionResult} />
+            <div className="sticky top-8">
+                 <InteractiveMap />
+            </div>
+            <PredictionResults result={predictionResult} />
         </div>
       </div>
     </FormProvider>
