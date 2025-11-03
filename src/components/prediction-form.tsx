@@ -1,11 +1,10 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { predictionSchema, type PredictionInput } from '@/lib/schemas';
-import { predictPriceClass, type ActionState } from '@/lib/actions';
+import { apiPredictionSchema, predictionSchema, type PredictionInput } from '@/lib/schemas';
+import type { PredictionResponse } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -48,23 +47,13 @@ const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | '
   { name: 'amenities_count', label: 'Amenities Count', icon: Briefcase, placeholder: 'e.g., 15', type: 'number' },
 ];
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full text-lg py-6">
-      {pending ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <Lightbulb className="mr-2 h-6 w-6" />}
-      Predict Price Class
-    </Button>
-  );
-}
-
 export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionFormProps) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [predictionResult, setPredictionResult] = useState<PredictionResponse | null>(null);
+
   const roomTypes = ['Entire home/apt', 'Private room', 'Shared room', 'Hotel room'];
   const responseTimes = ['within an hour', 'within a few hours', 'within a day', 'a few days or more'];
-
-  const initialState: ActionState = { message: null, result: null, errors: null };
-  const [state, formAction] = useActionState(predictPriceClass, initialState);
 
   const form = useForm<PredictionInput>({
     resolver: zodResolver(predictionSchema),
@@ -100,30 +89,71 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
     },
   });
 
-  useEffect(() => {
-    if (state.message && !state.result) {
-      toast({
-        variant: "destructive",
-        title: "Prediction Error",
-        description: state.message,
-      });
-    }
-  }, [state.message, state.result, toast]);
-
-  useEffect(() => {
-    // Clear previous errors
+  const onSubmit = async (data: PredictionInput) => {
+    setIsSubmitting(true);
+    setPredictionResult(null);
     form.clearErrors();
-    if (state.errors) {
-      Object.entries(state.errors).forEach(([field, errors]) => {
-        if (errors) {
-          form.setError(field as keyof PredictionInput, {
-            type: 'server',
-            message: errors.join(', '),
-          });
-        }
-      });
+
+    const validatedApiData = apiPredictionSchema.safeParse(data);
+
+    if (!validatedApiData.success) {
+      console.error("API validation failed", validatedApiData.error.flatten().fieldErrors);
+      setIsSubmitting(false);
+      // This should ideally not happen if form validation is correct
+      return;
     }
-  }, [state.errors, form]);
+    
+    const { api_url, ...predictionData } = validatedApiData.data;
+
+    try {
+      const response = await fetch(`${api_url}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(predictionData),
+      });
+
+      if (!response.ok) {
+        let errorMessage = `An API error occurred: ${response.status} ${response.statusText}`;
+        try {
+            const errorBody = await response.json();
+            const firstError = errorBody.detail?.[0];
+            errorMessage = firstError ? `${firstError.loc.join('.')} - ${firstError.msg}`: 'Unknown validation issue.';
+            errorMessage = `API Validation Error: ${errorMessage}`;
+        } catch (e) {
+            // Could not parse error body, use the status text.
+        }
+
+        toast({
+            variant: "destructive",
+            title: "Prediction Error",
+            description: errorMessage,
+        });
+        
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const result: PredictionResponse = await response.json();
+      setPredictionResult(result);
+
+    } catch (error) {
+      let errorMessage = "An unknown error occurred.";
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+             errorMessage = `Could not connect to the API at ${api_url}. Please ensure the API server is running and accessible.`;
+        } else {
+             errorMessage = `A network error occurred: ${error.message}`;
+        }
+      }
+       toast({
+        variant: "destructive",
+        title: "Connection Error",
+        description: errorMessage,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   return (
     <div className="grid md:grid-cols-2 md:gap-8 lg:gap-12">
@@ -135,7 +165,7 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
         <CardContent>
           <Form {...form}>
             <form
-              action={formAction}
+              onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-6"
               noValidate
             >
@@ -311,7 +341,10 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
                 />
               </div>
               
-              <SubmitButton />
+              <Button type="submit" disabled={isSubmitting} className="w-full text-lg py-6">
+                {isSubmitting ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <Lightbulb className="mr-2 h-6 w-6" />}
+                Predict Price Class
+              </Button>
 
             </form>
           </Form>
@@ -319,10 +352,8 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
       </Card>
       
       <div className="mt-8 md:mt-0">
-         <PredictionResults result={state.result} />
+         <PredictionResults result={predictionResult} />
       </div>
     </div>
   );
 }
-
-    

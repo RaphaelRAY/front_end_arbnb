@@ -31,6 +31,7 @@ export const predictionSchema = z.object({
   property_type: z.string().min(1, "Property type is required"),
 });
 
+// This schema is for validating the data just before sending it to the API
 export const apiPredictionSchema = predictionSchema.transform((data) => ({
   ...data,
   host_response_rate: data.host_response_rate / 100,
@@ -39,5 +40,6 @@ export const apiPredictionSchema = predictionSchema.transform((data) => ({
   host_identity_verified: data.host_identity_verified === 't',
   has_availability: data.has_availability === 't',
 }));
+
 
 export type PredictionInput = z.infer<typeof predictionSchema>;
