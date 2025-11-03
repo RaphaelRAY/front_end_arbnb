@@ -4,9 +4,6 @@
 import { apiPredictionSchema } from "./schemas";
 import type { PredictionResponse } from "./types";
 
-// In a real app, this would be in a .env file
-const API_BASE_URL = 'http://127.0.0.1:8000';
-
 export type ActionState = {
   message: string | null;
   result: PredictionResponse | null;
@@ -16,6 +13,8 @@ export type ActionState = {
 }
 
 export async function getEnums(type: 'room_type' | 'host_response_time'): Promise<string[]> {
+  // In a real app, this would be in a .env file
+  const API_BASE_URL = 'http://127.0.0.1:8000';
   try {
     const response = await fetch(`${API_BASE_URL}/enums/${type}`);
     if (!response.ok) {
@@ -51,19 +50,24 @@ export async function predictPriceClass(
     };
   }
 
+  const { api_url, ...predictionData } = validatedFields.data;
+
   try {
-    const response = await fetch(`${API_BASE_URL}/predict`, {
+    const response = await fetch(`${api_url}/predict`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validatedFields.data),
+      body: JSON.stringify(predictionData),
     });
 
     if (response.status === 422) {
       const errorBody = await response.json();
+      const firstError = errorBody.detail?.[0];
+      const errorMessage = firstError ? `${firstError.loc.join('.')} - ${firstError.msg}`: 'Unknown validation issue.';
+      
       return {
-        message: `API Validation Error: ${errorBody.detail?.[0]?.msg || 'Unknown validation issue.'}`,
+        message: `API Validation Error: ${errorMessage}`,
         result: null,
-        errors: { _form: [errorBody.detail?.[0]?.msg || 'Unknown validation issue.'] }
+        errors: { _form: [errorMessage] }
       };
     }
 
@@ -88,7 +92,7 @@ export async function predictPriceClass(
     if (error instanceof Error) {
         if (error.message.includes('ECONNREFUSED')) {
             return {
-                message: "Could not connect to the prediction service. Please ensure the API server is running on " + API_BASE_URL,
+                message: "Could not connect to the prediction service. Please ensure the API server is running on " + api_url,
                 result: null,
                 errors: null
             };

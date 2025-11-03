@@ -2,6 +2,7 @@ export type RoomType = 'Entire home/apt' | 'Private room' | 'Shared room' | 'Hot
 export type HostResponseType = 'within an hour' | 'within a few hours' | 'within a day' | 'a few days or more';
 
 export type PredictionInput = {
+  api_url: string;
   latitude: number;
   longitude: number;
   room_type: RoomType;
