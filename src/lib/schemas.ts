@@ -30,4 +30,13 @@ export const predictionSchema = z.object({
   property_type: z.string().min(1, "Property type is required"),
 });
 
+export const apiPredictionSchema = predictionSchema.transform((data) => ({
+  ...data,
+  host_response_rate: data.host_response_rate / 100,
+  host_acceptance_rate: data.host_acceptance_rate / 100,
+  host_has_profile_pic: data.host_has_profile_pic === 't',
+  host_identity_verified: data.host_identity_verified === 't',
+  has_availability: data.has_availability === 't',
+}));
+
 export type PredictionInput = z.infer<typeof predictionSchema>;

@@ -1,8 +1,8 @@
 
 "use server";
 
-import { predictionSchema } from "./schemas";
-import type { PredictionResponse, PredictionInput } from "./types";
+import { apiPredictionSchema } from "./schemas";
+import type { PredictionResponse } from "./types";
 
 // In a real app, this would be in a .env file
 const API_BASE_URL = 'http://127.0.0.1:8000';
@@ -41,7 +41,7 @@ export async function predictPriceClass(
 ): Promise<ActionState> {
   const rawData = Object.fromEntries(formData.entries());
   
-  const validatedFields = predictionSchema.safeParse(rawData);
+  const validatedFields = apiPredictionSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
     return {
