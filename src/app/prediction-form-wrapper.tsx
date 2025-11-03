@@ -24,7 +24,7 @@ export function PredictionFormWrapper({
 }: PredictionFormWrapperProps) {
   
   return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="grid max-w-7xl mx-auto lg:grid-cols-2 lg:gap-12 space-y-8 lg:space-y-0">
         <PredictionForm 
           neighbourhoods={neighbourhoods}
           propertyTypes={propertyTypes}
@@ -32,7 +32,9 @@ export function PredictionFormWrapper({
           onSubmit={onSubmit}
           isSubmitting={isSubmitting}
         />
-        <PredictionResults result={predictionResult} />
+        <div className="lg:sticky top-8 self-start">
+          <PredictionResults result={predictionResult} />
+        </div>
       </div>
   );
 }
