@@ -280,7 +280,7 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Property Type</FormLabel>
-                          <Select onValuechange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a property type" />
@@ -306,7 +306,7 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
                           <FormItem>
                             <FormLabel className="flex items-center"><Icon className="mr-2 h-4 w-4" />{label}</FormLabel>
                             <FormControl>
-                              <Input placeholder={placeholder} type={type || 'text'} {...field} />
+                              <Input placeholder={placeholder} type={type || 'text'} {...field} onChange={e => field.onChange(type === 'number' ? e.target.valueAsNumber || 0 : e.target.value)} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
