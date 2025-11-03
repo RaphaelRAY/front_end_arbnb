@@ -10,6 +10,8 @@ import { predictionSchema, type PredictionInput, apiPredictionSchema } from '@/l
 import type { ApiPredictionResponse, PredictionResponse } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
+const defaultApiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+
 export default function Home() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,7 +23,7 @@ export default function Home() {
   const form = useForm<PredictionInput>({
     resolver: zodResolver(predictionSchema),
     defaultValues: {
-      api_url: 'http://127.0.0.1:8000',
+      api_url: defaultApiUrl,
       latitude: -22.9697,
       longitude: -43.1869,
       room_type: roomTypes[0],
