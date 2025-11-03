@@ -40,7 +40,7 @@ const LIMEExplanation = ({ explanation }: { explanation: string }) => {
 export function PredictionResults({ result }: PredictionResultsProps) {
   return (
     <Card className="shadow-lg sticky top-8 min-h-[500px] flex flex-col justify-center">
-        {result ? (
+        {result && result.predicao ? (
           <div
             key="results"
             className="w-full animate-in fade-in-0 zoom-in-95 duration-500"
@@ -58,32 +58,36 @@ export function PredictionResults({ result }: PredictionResultsProps) {
                 <PriceBadge level={result.predicao} />
               </div>
               
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Class Probabilities</h3>
-                <div className="space-y-3">
-                  {Object.entries(result.probabilidades).sort((a,b) => b[1] - a[1]).map(([key, value]) => (
-                    <div key={key}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium capitalize">{key}</span>
-                        <span className="text-sm font-semibold text-primary">{(value * 100).toFixed(1)}%</span>
+              {result.probabilidades && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Class Probabilities</h3>
+                  <div className="space-y-3">
+                    {Object.entries(result.probabilidades).sort((a,b) => b[1] - a[1]).map(([key, value]) => (
+                      <div key={key}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium capitalize">{key}</span>
+                          <span className="text-sm font-semibold text-primary">{(value * 100).toFixed(1)}%</span>
+                        </div>
+                        <Progress value={value * 100} className="h-2" />
                       </div>
-                      <Progress value={value * 100} className="h-2" />
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <Separator />
 
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Key Price Factors</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  These features had the biggest impact on the prediction, powered by LIME.
-                </p>
-                <ul className="divide-y divide-border -mt-2">
-                  {result.explicacao_LIME.map((exp, i) => <LIMEExplanation key={i} explanation={exp} />)}
-                </ul>
-              </div>
+              {result.explicacao_LIME && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Key Price Factors</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    These features had the biggest impact on the prediction, powered by LIME.
+                  </p>
+                  <ul className="divide-y divide-border -mt-2">
+                    {result.explicacao_LIME.map((exp, i) => <LIMEExplanation key={i} explanation={exp} />)}
+                  </ul>
+                </div>
+              )}
             </CardContent>
           </div>
         ) : (
