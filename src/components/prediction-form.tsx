@@ -1,7 +1,6 @@
 'use client';
 
 import type { PredictionInput } from '@/lib/schemas';
-import type { PredictionResponse } from '@/lib/types';
 import {
   Activity, Bath, BedDouble, Briefcase, Building, Calendar, Clock, Globe, Hash, Home, Image as ImageIcon, Lightbulb, Loader2, Map, MapPin, Percent, ShieldCheck, Users
 } from 'lucide-react';
@@ -16,10 +15,9 @@ import { Switch } from './ui/switch';
 interface PredictionFormProps {
   neighbourhoods: string[];
   propertyTypes: string[];
-  form: any; // Accept form instance as a prop
+  form: any;
   onSubmit: (data: PredictionInput) => void;
   isSubmitting: boolean;
-  predictionResult: PredictionResponse | null;
 }
 
 
@@ -52,7 +50,6 @@ export function PredictionForm({
     form,
     onSubmit,
     isSubmitting,
-    predictionResult,
   }: PredictionFormProps) {
   
   const roomTypes = ['Entire home/apt', 'Private room', 'Shared room', 'Hotel room'];

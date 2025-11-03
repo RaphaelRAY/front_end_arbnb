@@ -101,6 +101,7 @@ export function PredictionFormWrapper({ neighbourhoods, propertyTypes }: Predict
               errorMessage = `API Error: ${JSON.stringify(errorBody)}`;
             }
         } catch (e) {
+          // Ignore if error body parsing fails
         }
 
         toast({
@@ -155,9 +156,8 @@ export function PredictionFormWrapper({ neighbourhoods, propertyTypes }: Predict
           form={form}
           onSubmit={onSubmit}
           isSubmitting={isSubmitting}
-          predictionResult={predictionResult}
         />
-        <div className="mt-8 lg:mt-0 space-y-8">
+        <div className="space-y-8">
           <div className="sticky top-8">
             <InteractiveMap />
           </div>
