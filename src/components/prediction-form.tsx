@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { predictionSchema, type PredictionInput, apiPredictionSchema } from '@/lib/schemas';
-import type { PredictionResponse, ApiPredictionResponse } from '@/lib/types';
+import type { ApiPredictionResponse, PredictionResponse } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -25,8 +25,8 @@ interface PredictionFormProps {
 }
 
 const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability' | 'neighbourhood_cleansed' | 'property_type'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
-  { name: 'latitude', label: 'Latitude', icon: MapPin, placeholder: 'e.g., 40.7128' },
-  { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -74.0060' },
+  { name: 'latitude', label: 'Latitude', icon: MapPin, placeholder: 'e.g., -22.9068' },
+  { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -43.1729' },
   { name: 'accommodates', label: 'Accommodates', icon: Users, placeholder: 'e.g., 4', type: 'number' },
   { name: 'bathrooms', label: 'Bathrooms', icon: Bath, placeholder: 'e.g., 2', type: 'number' },
   { name: 'bedrooms', label: 'Bedrooms', icon: BedDouble, placeholder: 'e-g., 3', type: 'number' },
@@ -59,8 +59,8 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
     resolver: zodResolver(predictionSchema),
     defaultValues: {
       api_url: 'http://127.0.0.1:8000',
-      latitude: 40.7128,
-      longitude: -74.0060,
+      latitude: -22.9068,
+      longitude: -43.1729,
       room_type: roomTypes[0],
       accommodates: 2,
       bathrooms: 1,
@@ -84,7 +84,7 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
       has_availability: 't',
       host_days_active: 365,
       amenities_count: 20,
-      neighbourhood_cleansed: neighbourhoods[0] || 'Midtown',
+      neighbourhood_cleansed: neighbourhoods[0] || 'Copacabana',
       property_type: propertyTypes[0] || 'Entire apartment',
     },
   });
@@ -144,7 +144,6 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
       
       const apiResult: ApiPredictionResponse = await response.json();
       
-      // Transform API response to the one frontend expects
       const transformedResult: PredictionResponse = {
         classe_prevista: apiResult.resultado.classe_prevista,
         confianca: apiResult.resultado.confianca,
@@ -178,7 +177,7 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
   
   return (
     <div className="grid md:grid-cols-2 md:gap-8 lg:gap-12">
-      <Card className="shadow-lg">
+      <Card className="shadow-lg md:col-span-2">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Listing Features</CardTitle>
           <CardDescription>Fill in the details of the property to get a prediction.</CardDescription>

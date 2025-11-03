@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+       {
+        protocol: 'https',
+        hostname: 'unpkg.com',
+        pathname: '/leaflet@1.9.4/dist/images/**',
+      },
     ],
   },
 };
