@@ -1,6 +1,8 @@
 import { getEnums } from '@/lib/actions';
 import { PredictionForm } from '@/components/prediction-form';
 import { BrainCircuit } from 'lucide-react';
+import { neighbourhoods } from '@/lib/neighbourhoods';
+import { propertyTypes } from '@/lib/property-types';
 
 export default async function Home() {
   const [roomTypes, responseTimes] = await Promise.all([
@@ -25,6 +27,8 @@ export default async function Home() {
       <PredictionForm
         roomTypes={roomTypes}
         responseTimes={responseTimes}
+        neighbourhoods={neighbourhoods}
+        propertyTypes={propertyTypes}
       />
     </main>
   );

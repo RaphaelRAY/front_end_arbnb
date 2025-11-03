@@ -22,9 +22,11 @@ import { Switch } from './ui/switch';
 interface PredictionFormProps {
   roomTypes: string[];
   responseTimes: string[];
+  neighbourhoods: string[];
+  propertyTypes: string[];
 }
 
-const formFields: { name: keyof Omit<PredictionInput, 'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
+const formFields: { name: keyof Omit<PredictionInput, 'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability' | 'neighbourhood_cleansed' | 'property_type'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
   { name: 'latitude', label: 'Latitude', icon: MapPin, placeholder: 'e.g., 40.7128' },
   { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -74.0060' },
   { name: 'accommodates', label: 'Accommodates', icon: Users, placeholder: 'e.g., 4', type: 'number' },
@@ -45,8 +47,6 @@ const formFields: { name: keyof Omit<PredictionInput, 'room_type' | 'host_respon
   { name: 'maximum_nights_avg_ntm', label: 'Max Nights Avg', icon: Calendar, placeholder: 'e.g., 120.3', type: 'number' },
   { name: 'host_days_active', label: 'Host Days Active', icon: Activity, placeholder: 'e.g., 730', type: 'number' },
   { name: 'amenities_count', label: 'Amenities Count', icon: Briefcase, placeholder: 'e.g., 15', type: 'number' },
-  { name: 'neighbourhood_cleansed', label: 'Neighbourhood', icon: Map, placeholder: 'e.g., Manhattan' },
-  { name: 'property_type', label: 'Property Type', icon: Building, placeholder: 'e.g., Apartment' },
 ];
 
 function SubmitButton() {
@@ -59,7 +59,7 @@ function SubmitButton() {
   );
 }
 
-export function PredictionForm({ roomTypes, responseTimes }: PredictionFormProps) {
+export function PredictionForm({ roomTypes, responseTimes, neighbourhoods, propertyTypes }: PredictionFormProps) {
   const { toast } = useToast();
 
   const initialState: ActionState = { message: null, result: null, errors: null };
@@ -93,8 +93,8 @@ export function PredictionForm({ roomTypes, responseTimes }: PredictionFormProps
       has_availability: 't',
       host_days_active: 365,
       amenities_count: 20,
-      neighbourhood_cleansed: 'Midtown',
-      property_type: 'Entire apartment',
+      neighbourhood_cleansed: neighbourhoods[0] || 'Midtown',
+      property_type: propertyTypes[0] || 'Entire apartment',
     },
   });
 
@@ -172,6 +172,46 @@ export function PredictionForm({ roomTypes, responseTimes }: PredictionFormProps
                         </FormControl>
                         <SelectContent>
                           {responseTimes.map(hrt => <SelectItem key={hrt} value={hrt}>{hrt}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="neighbourhood_cleansed"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Map className="mr-2 h-4 w-4" />Neighbourhood</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a neighbourhood" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {neighbourhoods.map(n => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="property_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Property Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a property type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {propertyTypes.map(pt => <SelectItem key={pt} value={pt}>{pt}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
