@@ -22,12 +22,13 @@ const PriceBadge = ({ level }: { level: string }) => {
   return <Badge className={`text-lg capitalize px-4 py-1 border-2 ${colors[level] || colors['medio']}`}>{level}</Badge>
 }
 
-const LIMEExplanation = ({ explanation }: { explanation: string }) => {
-  const isPositive = !explanation.includes('<');
+const LIMEExplanation = ({ explanation }: { explanation: [string, number] }) => {
+  const [text, value] = explanation;
+  const isPositive = value > 0;
   const Icon = isPositive ? TrendingUp : TrendingDown;
   const color = isPositive ? 'text-green-600' : 'text-red-600';
   
-  const cleaned = explanation.replace(/<|>/g, ' ').replace(/=/g, ' = ').replace(/<=/g, ' ≤ ').replace(/>=/g, ' ≥ ').trim();
+  const cleaned = text.replace(/<|>/g, ' ').replace(/=/g, ' = ').replace(/<=/g, ' ≤ ').replace(/>=/g, ' ≥ ').trim();
 
   return (
     <li className="flex items-center gap-3 py-3">
@@ -40,7 +41,7 @@ const LIMEExplanation = ({ explanation }: { explanation: string }) => {
 export function PredictionResults({ result }: PredictionResultsProps) {
   return (
     <Card className="shadow-lg sticky top-8 min-h-[500px] flex flex-col justify-center">
-        {result && result.predicao ? (
+        {result && result.classe_prevista ? (
           <div
             key="results"
             className="w-full animate-in fade-in-0 zoom-in-95 duration-500"
@@ -55,7 +56,7 @@ export function PredictionResults({ result }: PredictionResultsProps) {
             <CardContent className="space-y-6">
               <div className="text-center p-6 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium text-muted-foreground mb-2">Predicted Price Class</p>
-                <PriceBadge level={result.predicao} />
+                <PriceBadge level={result.classe_prevista} />
               </div>
               
               {result.probabilidades && (

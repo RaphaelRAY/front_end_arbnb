@@ -32,12 +32,29 @@ export type PredictionInput = {
   property_type: string;
 };
 
+// This is the raw response from the Python API
+export type ApiPredictionResponse = {
+  status: string;
+  resultado: {
+    classe_prevista: 'baixo' | 'medio' | 'luxo';
+    confianca: string;
+    explicacao_LIME: [string, number][];
+    probabilidades: {
+      baixo: string;
+      medio: string;
+      luxo: string;
+    };
+  };
+};
+
+
+// This is the transformed response that the frontend components will use
 export type PredictionResponse = {
-  predicao: 'baixo' | 'medio' | 'luxo';
+  classe_prevista: 'baixo' | 'medio' | 'luxo';
   probabilidades: {
     baixo: number;
     medio: number;
     luxo: number;
   };
-  explicacao_LIME: string[];
+  explicacao_LIME: [string, number][];
 };

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { apiPredictionSchema, predictionSchema, type PredictionInput } from '@/lib/schemas';
-import type { PredictionResponse } from '@/lib/types';
+import { predictionSchema, type PredictionInput, apiPredictionSchema } from '@/lib/schemas';
+import type { PredictionResponse, ApiPredictionResponse } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -33,8 +33,8 @@ const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | '
   { name: 'beds', label: 'Beds', icon: BedDouble, placeholder: 'e.g., 3', type: 'number' },
   { name: 'host_response_rate', label: 'Host Response Rate', icon: Percent, placeholder: '0-100', type: 'number' },
   { name: 'host_acceptance_rate', label: 'Host Acceptance Rate', icon: Percent, placeholder: '0-100', type: 'number' },
-  { name: 'host_listings_count', label: 'Anúncios Ativos do Anfitrião', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
-  { name: 'host_total_listings_count', label: 'Total de Anúncios do Anfitrião', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'host_listings_count', label: 'Host Listings', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'host_total_listings_count', label: 'Host Total Listings', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
   { name: 'minimum_nights', label: 'Minimum Nights', icon: Calendar, placeholder: 'e.g., 1', type: 'number' },
   { name: 'maximum_nights', label: 'Maximum Nights', icon: Calendar, placeholder: 'e.g., 30', type: 'number' },
   { name: 'minimum_minimum_nights', label: 'Min Minimum Nights', icon: Calendar, placeholder: 'e.g., 1', type: 'number' },
@@ -116,9 +116,13 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
         let errorMessage = `An API error occurred: ${response.status} ${response.statusText}`;
         try {
             const errorBody = await response.json();
-            const firstError = errorBody.detail?.[0];
-            errorMessage = firstError ? `${firstError.loc.join('.')} - ${firstError.msg}`: 'Unknown validation issue.';
-            errorMessage = `API Validation Error: ${errorMessage}`;
+            if (errorBody.detail) {
+              const firstError = errorBody.detail?.[0];
+              errorMessage = firstError ? `${firstError.loc.join('.')} - ${firstError.msg}`: 'Unknown validation issue.';
+            } else {
+              errorMessage = JSON.stringify(errorBody);
+            }
+            errorMessage = `API Error: ${errorMessage}`;
         } catch (e) {
             // Could not parse error body, use the status text.
         }
@@ -133,14 +137,25 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
         return;
       }
       
-      const result: PredictionResponse = await response.json();
-      setPredictionResult(result);
+      const apiResult: ApiPredictionResponse = await response.json();
+      
+      // Transform API response to the one frontend expects
+      const transformedResult: PredictionResponse = {
+        classe_prevista: apiResult.resultado.classe_prevista,
+        probabilidades: Object.entries(apiResult.resultado.probabilidades).reduce((acc, [key, value]) => {
+          acc[key as keyof PredictionResponse['probabilidades']] = parseFloat(value) / 100;
+          return acc;
+        }, {} as PredictionResponse['probabilidades']),
+        explicacao_LIME: apiResult.resultado.explicacao_LIME,
+      };
+
+      setPredictionResult(transformedResult);
 
     } catch (error) {
       let errorMessage = "An unknown error occurred.";
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch')) {
-             errorMessage = `Could not connect to the API at ${api_url}. Please ensure the API server is running and accessible.`;
+             errorMessage = `Could not connect to the API at ${api_url}. Please ensure the API server is running and accessible, and that CORS is enabled.`;
         } else {
              errorMessage = `A network error occurred: ${error.message}`;
         }
