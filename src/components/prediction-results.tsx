@@ -198,14 +198,15 @@ export function PredictionResults({ result }: PredictionResultsProps) {
                         <Code className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="max-w-2xl">
                       <AlertDialogHeader>
                         <AlertDialogTitle>Raw LIME Explanation</AlertDialogTitle>
                         <AlertDialogDescription>
-                          <pre className="mt-2 max-h-[400px] overflow-auto rounded-md bg-muted p-4 text-xs text-muted-foreground">
-                            {JSON.stringify(result.explicacao_LIME, null, 2)}
-                          </pre>
+                          The raw JSON output from the LIME explanation model is displayed below.
                         </AlertDialogDescription>
+                         <pre className="mt-2 max-h-[400px] overflow-auto rounded-md bg-muted p-4 text-xs text-muted-foreground">
+                          {JSON.stringify(result.explicacao_LIME, null, 2)}
+                        </pre>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogAction>Fechar</AlertDialogAction>
