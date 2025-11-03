@@ -1,5 +1,15 @@
-export type RoomType = 'Entire home/apt' | 'Private room' | 'Shared room' | 'Hotel room';
-export type HostResponseType = 'within an hour' | 'within a few hours' | 'within a day' | 'a few days or more';
+'use client';
+
+export type RoomType =
+  | 'Entire home/apt'
+  | 'Private room'
+  | 'Shared room'
+  | 'Hotel room';
+export type HostResponseType =
+  | 'within an hour'
+  | 'within a few hours'
+  | 'within a day'
+  | 'a few days or more';
 
 export type PredictionInput = {
   api_url: string;
@@ -40,6 +50,7 @@ export type LIMEExplanationItem = {
   valor: number | string;
   impacto: number;
   direcao: string;
+  valor_referencia?: number | string;
 };
 
 // This represents the LIME explanation object from the API
@@ -62,7 +73,6 @@ export type ApiPredictionResponse = {
     };
   };
 };
-
 
 // This is the transformed response that the frontend components will use
 export type PredictionResponse = {
