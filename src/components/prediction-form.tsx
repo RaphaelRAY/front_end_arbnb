@@ -1,16 +1,16 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { predictionSchema, type PredictionInput } from '@/lib/schemas';
 import { predictPriceClass, type ActionState } from '@/lib/actions';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PredictionResults } from './prediction-results';
@@ -60,12 +60,11 @@ function SubmitButton() {
 
 export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionFormProps) {
   const { toast } = useToast();
-  const [roomTypes, setRoomTypes] = useState<string[]>([]);
-  const [responseTimes, setResponseTimes] = useState<string[]>([]);
-
+  const roomTypes = ['Entire home/apt', 'Private room', 'Shared room', 'Hotel room'];
+  const responseTimes = ['within an hour', 'within a few hours', 'within a day', 'a few days or more'];
 
   const initialState: ActionState = { message: null, result: null, errors: null };
-  const [state, formAction] = useFormState(predictPriceClass, initialState);
+  const [state, formAction] = useActionState(predictPriceClass, initialState);
 
   const form = useForm<PredictionInput>({
     resolver: zodResolver(predictionSchema),
@@ -73,12 +72,12 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
       api_url: 'http://127.0.0.1:8000',
       latitude: 40.7128,
       longitude: -74.0060,
-      room_type: '',
+      room_type: roomTypes[0],
       accommodates: 2,
       bathrooms: 1,
       bedrooms: 1,
       beds: 1,
-      host_response_time: '',
+      host_response_time: responseTimes[0],
       host_response_rate: 100,
       host_acceptance_rate: 100,
       host_listings_count: 1,
@@ -100,58 +99,6 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
       property_type: propertyTypes[0] || 'Entire apartment',
     },
   });
-
-  const apiUrl = form.watch('api_url');
-
-  useEffect(() => {
-    const fetchEnums = async () => {
-      if (!apiUrl) return;
-
-      try {
-        const [roomTypeRes, responseTimeRes] = await Promise.all([
-          fetch(`${apiUrl}/enums/room_type`),
-          fetch(`${apiUrl}/enums/host_response_time`)
-        ]);
-
-        if (roomTypeRes.ok) {
-          const data = await roomTypeRes.json();
-          setRoomTypes(data);
-          if (data.length > 0) {
-            form.setValue('room_type', data[0]);
-          }
-        } else {
-            setRoomTypes(['Entire home/apt', 'Private room', 'Shared room', 'Hotel room']);
-            form.setValue('room_type', 'Entire home/apt');
-        }
-
-        if (responseTimeRes.ok) {
-          const data = await responseTimeRes.json();
-          setResponseTimes(data);
-           if (data.length > 0) {
-            form.setValue('host_response_time', data[0]);
-          }
-        } else {
-            setResponseTimes(['within an hour', 'within a few hours', 'within a day', 'a few days or more']);
-            form.setValue('host_response_time', 'within an hour');
-        }
-
-      } catch (error) {
-        console.error("Failed to fetch enums", error);
-        toast({
-            variant: "destructive",
-            title: "Could not load API data",
-            description: `Could not connect to ${apiUrl}. Using default dropdown values.`,
-        });
-        setRoomTypes(['Entire home/apt', 'Private room', 'Shared room', 'Hotel room']);
-        form.setValue('room_type', 'Entire home/apt');
-        setResponseTimes(['within an hour', 'within a few hours', 'within a day', 'a few days or more']);
-        form.setValue('host_response_time', 'within an hour');
-      }
-    };
-
-    fetchEnums();
-  }, [apiUrl, form, toast]);
-
 
   useEffect(() => {
     if (state.message && !state.result) {
