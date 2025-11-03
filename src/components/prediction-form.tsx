@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
+import dynamic from 'next/dynamic';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { predictionSchema, type PredictionInput, apiPredictionSchema } from '@/lib/schemas';
 import type { ApiPredictionResponse, PredictionResponse } from '@/lib/types';
@@ -18,6 +19,11 @@ import {
 } from 'lucide-react';
 import { Switch } from './ui/switch';
 import { Separator } from './ui/separator';
+
+const InteractiveMap = dynamic(() => import('@/components/interactive-map').then(mod => mod.InteractiveMap), {
+  ssr: false,
+  loading: () => <div className="h-[400px] w-full bg-muted rounded-lg animate-pulse" />
+});
 
 interface PredictionFormProps {
   neighbourhoods: string[];
@@ -176,204 +182,211 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
   };
   
   return (
-    <div className="grid md:grid-cols-2 md:gap-8 lg:gap-12">
-      <Card className="shadow-lg md:col-span-2">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline">Listing Features</CardTitle>
-          <CardDescription>Fill in the details of the property to get a prediction.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-              noValidate
-            >
-              <FormField
-                control={form.control}
-                name="api_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center"><Globe className="mr-2 h-4 w-4" />API Endpoint</FormLabel>
-                     <FormControl>
-                        <Input placeholder="Enter API URL" {...field} />
-                      </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Separator />
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="room_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center"><Home className="mr-2 h-4 w-4" />Room Type</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select room type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {roomTypes.map(rt => <SelectItem key={rt} value={rt}>{rt}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="host_response_time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center"><Clock className="mr-2 h-4 w-4" />Host Response Time</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select response time" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {responseTimes.map(hrt => <SelectItem key={hrt} value={hrt}>{hrt}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="neighbourhood_cleansed"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center"><Map className="mr-2 h-4 w-4" />Neighbourhood</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a neighbourhood" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {neighbourhoods.map(n => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="property_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Property Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a property type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {propertyTypes.map(pt => <SelectItem key={pt} value={pt}>{pt}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {formFields.map(({ name, label, icon: Icon, placeholder, type }) => (
+    <FormProvider {...form}>
+      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+        <div>
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-headline">Listing Features</CardTitle>
+              <CardDescription>Fill in the details of the property to get a prediction.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                  noValidate
+                >
                   <FormField
-                    key={name}
                     control={form.control}
-                    name={name as keyof PredictionInput}
+                    name="api_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center"><Icon className="mr-2 h-4 w-4" />{label}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={placeholder} type={type || 'text'} {...field} />
-                        </FormControl>
+                        <FormLabel className="flex items-center"><Globe className="mr-2 h-4 w-4" />API Endpoint</FormLabel>
+                         <FormControl>
+                            <Input placeholder="Enter API URL" {...field} />
+                          </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                ))}
-              </div>
 
-              <div className="grid sm:grid-cols-3 gap-4 pt-4">
-                 <FormField
-                  control={form.control}
-                  name="host_has_profile_pic"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel className='flex items-center'><ImageIcon className="mr-2 h-4 w-4" />Has Profile Pic?</FormLabel>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value === 't'}
-                          onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="host_identity_verified"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel className='flex items-center'><ShieldCheck className="mr-2 h-4 w-4" />Identity Verified?</FormLabel>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value === 't'}
-                          onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="has_availability"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel className='flex items-center'><Calendar className="mr-2 h-4 w-4" />Has Availability?</FormLabel>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value === 't'}
-                          onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <Button type="submit" disabled={isSubmitting} className="w-full text-lg py-6">
-                {isSubmitting ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <Lightbulb className="mr-2 h-6 w-6" />}
-                Predict Price Class
-              </Button>
+                  <Separator />
 
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      
-      <div className="mt-8 md:mt-0">
-         <PredictionResults result={predictionResult} />
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="room_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><Home className="mr-2 h-4 w-4" />Room Type</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select room type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {roomTypes.map(rt => <SelectItem key={rt} value={rt}>{rt}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="host_response_time"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><Clock className="mr-2 h-4 w-4" />Host Response Time</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select response time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {responseTimes.map(hrt => <SelectItem key={hrt} value={hrt}>{hrt}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="neighbourhood_cleansed"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><Map className="mr-2 h-4 w-4" />Neighbourhood</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a neighbourhood" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {neighbourhoods.map(n => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="property_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Property Type</FormLabel>
+                          <Select onValuechange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a property type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {propertyTypes.map(pt => <SelectItem key={pt} value={pt}>{pt}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {formFields.map(({ name, label, icon: Icon, placeholder, type }) => (
+                      <FormField
+                        key={name}
+                        control={form.control}
+                        name={name as keyof PredictionInput}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center"><Icon className="mr-2 h-4 w-4" />{label}</FormLabel>
+                            <FormControl>
+                              <Input placeholder={placeholder} type={type || 'text'} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="grid sm:grid-cols-3 gap-4 pt-4">
+                     <FormField
+                      control={form.control}
+                      name="host_has_profile_pic"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel className='flex items-center'><ImageIcon className="mr-2 h-4 w-4" />Has Profile Pic?</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value === 't'}
+                              onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="host_identity_verified"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel className='flex items-center'><ShieldCheck className="mr-2 h-4 w-4" />Identity Verified?</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value === 't'}
+                              onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="has_availability"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel className='flex items-center'><Calendar className="mr-2 h-4 w-4" />Has Availability?</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value === 't'}
+                              onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button type="submit" disabled={isSubmitting} className="w-full text-lg py-6">
+                    {isSubmitting ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <Lightbulb className="mr-2 h-6 w-6" />}
+                    Predict Price Class
+                  </Button>
+
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-8 lg:mt-0 space-y-8">
+          <div className="sticky top-8">
+            <InteractiveMap />
+          </div>
+           <PredictionResults result={predictionResult} />
+        </div>
       </div>
-    </div>
+    </FormProvider>
   );
 }
