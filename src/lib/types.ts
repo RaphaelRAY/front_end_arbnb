@@ -51,6 +51,7 @@ export type ApiPredictionResponse = {
 // This is the transformed response that the frontend components will use
 export type PredictionResponse = {
   classe_prevista: 'baixo' | 'medio' | 'luxo';
+  confianca: string;
   probabilidades: {
     baixo: number;
     medio: number;

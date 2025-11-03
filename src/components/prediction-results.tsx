@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import type { PredictionResponse } from '@/lib/types';
-import { Lightbulb, TrendingUp, TrendingDown } from 'lucide-react';
+import { Lightbulb, TrendingUp, TrendingDown, Target } from 'lucide-react';
 import React from 'react';
 
 interface PredictionResultsProps {
@@ -54,9 +54,20 @@ export function PredictionResults({ result }: PredictionResultsProps) {
               <CardDescription>Here's the breakdown of your listing's price class.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="text-center p-6 bg-muted/50 rounded-lg">
-                <p className="text-sm font-medium text-muted-foreground mb-2">Predicted Price Class</p>
-                <PriceBadge level={result.classe_prevista} />
+              <div className="text-center p-6 bg-muted/50 rounded-lg space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Predicted Price Class</p>
+                  <PriceBadge level={result.classe_prevista} />
+                </div>
+                 {result.confianca && (
+                   <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">Confidence</p>
+                      <p className="font-bold text-2xl text-primary flex items-center justify-center gap-2">
+                        <Target className="h-6 w-6"/>
+                        {result.confianca}
+                      </p>
+                   </div>
+                 )}
               </div>
               
               {result.probabilidades && (

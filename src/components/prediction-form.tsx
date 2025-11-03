@@ -116,20 +116,25 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
         let errorMessage = `An API error occurred: ${response.status} ${response.statusText}`;
         try {
             const errorBody = await response.json();
-            if (errorBody.detail) {
+            if (response.status === 422 && errorBody.detail) {
               const firstError = errorBody.detail?.[0];
-              errorMessage = firstError ? `${firstError.loc.join('.')} - ${firstError.msg}`: 'Unknown validation issue.';
+               if (firstError) {
+                 errorMessage = `Validation Error: ${firstError.loc.join(' -> ')} - ${firstError.msg}`;
+               } else {
+                 errorMessage = 'Unknown validation error occurred.'
+               }
+            } else if (errorBody.detail) {
+               errorMessage = `API Error: ${errorBody.detail}`;
             } else {
-              errorMessage = JSON.stringify(errorBody);
+              errorMessage = `API Error: ${JSON.stringify(errorBody)}`;
             }
-            errorMessage = `API Error: ${errorMessage}`;
         } catch (e) {
             // Could not parse error body, use the status text.
         }
 
         toast({
             variant: "destructive",
-            title: "Prediction Error",
+            title: "Prediction Failed",
             description: errorMessage,
         });
         
@@ -142,6 +147,7 @@ export function PredictionForm({ neighbourhoods, propertyTypes }: PredictionForm
       // Transform API response to the one frontend expects
       const transformedResult: PredictionResponse = {
         classe_prevista: apiResult.resultado.classe_prevista,
+        confianca: apiResult.resultado.confianca,
         probabilidades: Object.entries(apiResult.resultado.probabilidades).reduce((acc, [key, value]) => {
           acc[key as keyof PredictionResponse['probabilidades']] = parseFloat(value) / 100;
           return acc;
