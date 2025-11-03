@@ -2,8 +2,6 @@ import { z } from "zod";
 
 export const predictionSchema = z.object({
   api_url: z.string().url("Invalid API URL"),
-  latitude: z.coerce.number().min(-90, "Invalid latitude").max(90, "Invalid latitude"),
-  longitude: z.coerce.number().min(-180, "Invalid longitude").max(180, "Invalid longitude"),
   room_type: z.string().min(1, "Room type is required"),
   accommodates: z.coerce.number().int().min(1, "Must accommodate at least 1 person"),
   bathrooms: z.coerce.number().min(0, "Bathrooms cannot be negative"),
@@ -32,7 +30,10 @@ export const predictionSchema = z.object({
 });
 
 // This schema is for validating the data just before sending it to the API
-export const apiPredictionSchema = predictionSchema.transform((data) => ({
+export const apiPredictionSchema = predictionSchema.extend({
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
+}).transform((data) => ({
   ...data,
   host_response_rate: data.host_response_rate / 100,
   host_acceptance_rate: data.host_acceptance_rate / 100,

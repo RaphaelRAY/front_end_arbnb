@@ -22,8 +22,6 @@ export default function Home() {
     resolver: zodResolver(predictionSchema),
     defaultValues: {
       api_url: 'http://127.0.0.1:8000',
-      latitude: -22.9068,
-      longitude: -43.1729,
       room_type: roomTypes[0],
       accommodates: 2,
       bathrooms: 1,
@@ -57,7 +55,15 @@ export default function Home() {
     setPredictionResult(null);
     form.clearErrors();
 
-    const validatedApiData = apiPredictionSchema.safeParse(data);
+    // The schema already transforms the data, but the API expects lat/long
+    // For now, let's add some default coordinates since the map is gone.
+    const dataWithCoords = {
+      ...data,
+      latitude: -22.9068,
+      longitude: -43.1729,
+    };
+
+    const validatedApiData = apiPredictionSchema.safeParse(dataWithCoords);
 
     if (!validatedApiData.success) {
       console.error("API validation failed", validatedApiData.error.flatten().fieldErrors);
@@ -147,7 +153,7 @@ export default function Home() {
           AirBnB Insights
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-foreground/80">
-          Enter your listing's details below or click on the map to predict its price category.
+          Enter your listing's details below to predict its price category.
         </p>
       </div>
       

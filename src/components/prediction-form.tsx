@@ -2,7 +2,7 @@
 
 import type { PredictionInput } from '@/lib/schemas';
 import {
-  Activity, Bath, BedDouble, Briefcase, Building, Calendar, Clock, Globe, Hash, Home, Image as ImageIcon, Lightbulb, Loader2, Map, MapPin, Percent, ShieldCheck, Users
+  Activity, Bath, BedDouble, Briefcase, Building, Calendar, Clock, Globe, Hash, Home, Image as ImageIcon, Lightbulb, Loader2, Map, Percent, ShieldCheck, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,8 +22,6 @@ interface PredictionFormProps {
 
 
 const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability' | 'neighbourhood_cleansed' | 'property_type'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
-  { name: 'latitude', label: 'Latitude', icon: MapPin, placeholder: 'e.g., -22.9068' },
-  { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -43.1729' },
   { name: 'accommodates', label: 'Accommodates', icon: Users, placeholder: 'e.g., 4', type: 'number' },
   { name: 'bathrooms', label: 'Bathrooms', icon: Bath, placeholder: 'e.g., 2', type: 'number' },
   { name: 'bedrooms', label: 'Bedrooms', icon: BedDouble, placeholder: 'e-g., 3', type: 'number' },
