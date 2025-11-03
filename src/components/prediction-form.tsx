@@ -21,9 +21,7 @@ interface PredictionFormProps {
 }
 
 
-const formFields: { name: keyof Omit<PredictionInput, 'api_url' |'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability' | 'neighbourhood_cleansed' | 'property_type'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
-  { name: 'latitude', label: 'Latitude', icon: MapPin, placeholder: 'e.g., -22.9697', type: 'number' },
-  { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -43.1869', type: 'number' },
+const formFields: { name: keyof Omit<PredictionInput, 'api_url' | 'latitude' | 'longitude' |'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability' | 'neighbourhood_cleansed' | 'property_type'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
   { name: 'accommodates', label: 'Accommodates', icon: Users, placeholder: 'e.g., 4', type: 'number' },
   { name: 'bathrooms', label: 'Bathrooms', icon: Bath, placeholder: 'e.g., 2', type: 'number' },
   { name: 'bedrooms', label: 'Bedrooms', icon: BedDouble, placeholder: 'e-g., 3', type: 'number' },
@@ -83,6 +81,36 @@ export function PredictionForm({
                 />
 
                 <Separator />
+                
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="latitude"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Latitude</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., -22.9697" type="number" step="any" {...field} onChange={e => field.onChange(e.target.valueAsNumber || 0)} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="longitude"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Longitude</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., -43.1869" type="number" step="any" {...field} onChange={e => field.onChange(e.target.valueAsNumber || 0)} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </div>
+
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <FormField
@@ -177,7 +205,7 @@ export function PredictionForm({
                         <FormItem>
                           <FormLabel className="flex items-center"><Icon className="mr-2 h-4 w-4" />{label}</FormLabel>
                           <FormControl>
-                            <Input placeholder={placeholder} type={type || 'text'} {...field} onChange={e => field.onChange(type === 'number' ? e.target.valueAsNumber || 0 : e.target.value)} />
+                            <Input placeholder={placeholder} type={type || 'text'} step="any" {...field} onChange={e => field.onChange(type === 'number' ? e.target.valueAsNumber || 0 : e.target.value)} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
