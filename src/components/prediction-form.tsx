@@ -10,13 +10,14 @@ import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PredictionResults } from './prediction-results';
 import {
-  BedDouble, Bath, Users, Home, Clock, Hash, MessageSquare, Star, Map, Wallet, MapPin, Loader2, Lightbulb
+  BedDouble, Bath, Users, Home, Clock, Hash, MessageSquare, Star, Map, Wallet, MapPin, Loader2, Lightbulb, Image as ImageIcon, ShieldCheck, Calendar, Activity, Building, Briefcase, Percent
 } from 'lucide-react';
+import { Switch } from './ui/switch';
 
 interface PredictionFormProps {
   roomTypes: string[];
@@ -30,7 +31,22 @@ const formFields: { name: keyof PredictionInput; label: string; icon: React.Elem
   { name: 'bathrooms', label: 'Bathrooms', icon: Bath, placeholder: 'e.g., 2', type: 'number' },
   { name: 'bedrooms', label: 'Bedrooms', icon: BedDouble, placeholder: 'e.g., 3', type: 'number' },
   { name: 'beds', label: 'Beds', icon: BedDouble, placeholder: 'e.g., 3', type: 'number' },
+  { name: 'host_response_rate', label: 'Host Response Rate', icon: Percent, placeholder: '0-100', type: 'number' },
+  { name: 'host_acceptance_rate', label: 'Host Acceptance Rate', icon: Percent, placeholder: '0-100', type: 'number' },
   { name: 'host_listings_count', label: 'Host Listings', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'host_total_listings_count', label: 'Host Total Listings', icon: Hash, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'minimum_nights', label: 'Minimum Nights', icon: Calendar, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'maximum_nights', label: 'Maximum Nights', icon: Calendar, placeholder: 'e.g., 30', type: 'number' },
+  { name: 'minimum_minimum_nights', label: 'Min Minimum Nights', icon: Calendar, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'maximum_minimum_nights', label: 'Max Minimum Nights', icon: Calendar, placeholder: 'e.g., 1', type: 'number' },
+  { name: 'minimum_maximum_nights', label: 'Min Maximum Nights', icon: Calendar, placeholder: 'e.g., 365', type: 'number' },
+  { name: 'maximum_maximum_nights', label: 'Max Maximum Nights', icon: Calendar, placeholder: 'e.g., 365', type: 'number' },
+  { name: 'minimum_nights_avg_ntm', label: 'Min Nights Avg', icon: Calendar, placeholder: 'e.g., 2.5', type: 'number' },
+  { name: 'maximum_nights_avg_ntm', label: 'Max Nights Avg', icon: Calendar, placeholder: 'e.g., 120.3', type: 'number' },
+  { name: 'host_days_active', label: 'Host Days Active', icon: Activity, placeholder: 'e.g., 730', type: 'number' },
+  { name: 'amenities_count', label: 'Amenities Count', icon: Briefcase, placeholder: 'e.g., 15', type: 'number' },
+  { name: 'neighbourhood_cleansed', label: 'Neighbourhood', icon: Map, placeholder: 'e.g., Manhattan' },
+  { name: 'property_type', label: 'Property Type', icon: Building, placeholder: 'e.g., Apartment' },
   { name: 'number_of_reviews', label: 'Number of Reviews', icon: MessageSquare, placeholder: 'e.g., 50', type: 'number' },
   { name: 'review_scores_rating', label: 'Overall Rating', icon: Star, placeholder: '0-100', type: 'number' },
   { name: 'review_scores_accuracy', label: 'Accuracy Score', icon: Star, placeholder: '0-10', type: 'number' },
@@ -68,7 +84,25 @@ export function PredictionForm({ roomTypes, responseTimes }: PredictionFormProps
       bedrooms: 1,
       beds: 1,
       host_response_time: responseTimes[0] || '',
+      host_response_rate: 100,
+      host_acceptance_rate: 100,
       host_listings_count: 1,
+      host_total_listings_count: 1,
+      host_has_profile_pic: 't',
+      host_identity_verified: 't',
+      minimum_nights: 1,
+      maximum_nights: 1125,
+      minimum_minimum_nights: 1,
+      maximum_minimum_nights: 1,
+      minimum_maximum_nights: 1125,
+      maximum_maximum_nights: 1125,
+      minimum_nights_avg_ntm: 1.0,
+      maximum_nights_avg_ntm: 1125.0,
+      has_availability: 't',
+      host_days_active: 365,
+      amenities_count: 20,
+      neighbourhood_cleansed: 'Midtown',
+      property_type: 'Entire apartment',
       number_of_reviews: 10,
       review_scores_rating: 95,
       review_scores_accuracy: 10,
@@ -179,6 +213,60 @@ export function PredictionForm({ roomTypes, responseTimes }: PredictionFormProps
                     )}
                   />
                 ))}
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-4 pt-4">
+                 <FormField
+                  control={form.control}
+                  name="host_has_profile_pic"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel className='flex items-center'><ImageIcon className="mr-2 h-4 w-4" />Has Profile Pic?</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value === 't'}
+                          onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="host_identity_verified"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel className='flex items-center'><ShieldCheck className="mr-2 h-4 w-4" />Identity Verified?</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value === 't'}
+                          onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="has_availability"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel className='flex items-center'><Calendar className="mr-2 h-4 w-4" />Has Availability?</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value === 't'}
+                          onCheckedChange={(checked) => field.onChange(checked ? 't' : 'f')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
               
               <SubmitButton />
