@@ -115,7 +115,6 @@ export default function Home() {
           acc[key as keyof PredictionResponse['probabilidades']] = parseFloat(value) / 100;
           return acc;
         }, {} as PredictionResponse['probabilidades']),
-        // The LIME explanation now comes in the correct format directly from the API
         explicacao_LIME: apiResult.resultado.explicacao_LIME,
       };
 
@@ -156,9 +155,6 @@ export default function Home() {
       
       <FormProvider {...form}>
         <PredictionFormWrapper
-          neighbourhoods={neighbourhoods}
-          propertyTypes={propertyTypes}
-          form={form}
           onSubmit={onSubmit}
           isSubmitting={isSubmitting}
           predictionResult={predictionResult}
