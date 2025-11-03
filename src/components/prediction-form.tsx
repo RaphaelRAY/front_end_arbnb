@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PredictionResults } from './prediction-results';
 import {
-  BedDouble, Bath, Users, Home, Clock, Hash, MessageSquare, Star, Map, Wallet, MapPin, Loader2, Lightbulb, Image as ImageIcon, ShieldCheck, Calendar, Activity, Building, Briefcase, Percent
+  BedDouble, Bath, Users, Home, Clock, Hash, Map, MapPin, Loader2, Lightbulb, Image as ImageIcon, ShieldCheck, Calendar, Activity, Building, Briefcase, Percent
 } from 'lucide-react';
 import { Switch } from './ui/switch';
 
@@ -24,7 +24,7 @@ interface PredictionFormProps {
   responseTimes: string[];
 }
 
-const formFields: { name: keyof PredictionInput; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
+const formFields: { name: keyof Omit<PredictionInput, 'room_type' | 'host_response_time' | 'host_has_profile_pic' | 'host_identity_verified' | 'has_availability'>; label: string; icon: React.ElementType; placeholder: string; type?: string }[] = [
   { name: 'latitude', label: 'Latitude', icon: MapPin, placeholder: 'e.g., 40.7128' },
   { name: 'longitude', label: 'Longitude', icon: MapPin, placeholder: 'e.g., -74.0060' },
   { name: 'accommodates', label: 'Accommodates', icon: Users, placeholder: 'e.g., 4', type: 'number' },
@@ -47,14 +47,6 @@ const formFields: { name: keyof PredictionInput; label: string; icon: React.Elem
   { name: 'amenities_count', label: 'Amenities Count', icon: Briefcase, placeholder: 'e.g., 15', type: 'number' },
   { name: 'neighbourhood_cleansed', label: 'Neighbourhood', icon: Map, placeholder: 'e.g., Manhattan' },
   { name: 'property_type', label: 'Property Type', icon: Building, placeholder: 'e.g., Apartment' },
-  { name: 'number_of_reviews', label: 'Number of Reviews', icon: MessageSquare, placeholder: 'e.g., 50', type: 'number' },
-  { name: 'review_scores_rating', label: 'Overall Rating', icon: Star, placeholder: '0-100', type: 'number' },
-  { name: 'review_scores_accuracy', label: 'Accuracy Score', icon: Star, placeholder: '0-10', type: 'number' },
-  { name: 'review_scores_cleanliness', label: 'Cleanliness Score', icon: Star, placeholder: '0-10', type: 'number' },
-  { name: 'review_scores_checkin', label: 'Check-in Score', icon: Star, placeholder: '0-10', type: 'number' },
-  { name: 'review_scores_communication', label: 'Communication Score', icon: Star, placeholder: '0-10', type: 'number' },
-  { name: 'review_scores_location', label: 'Location Score', icon: Map, placeholder: '0-10', type: 'number' },
-  { name: 'review_scores_value', label: 'Value Score', icon: Wallet, placeholder: '0-10', type: 'number' },
 ];
 
 function SubmitButton() {
@@ -103,14 +95,6 @@ export function PredictionForm({ roomTypes, responseTimes }: PredictionFormProps
       amenities_count: 20,
       neighbourhood_cleansed: 'Midtown',
       property_type: 'Entire apartment',
-      number_of_reviews: 10,
-      review_scores_rating: 95,
-      review_scores_accuracy: 10,
-      review_scores_cleanliness: 10,
-      review_scores_checkin: 10,
-      review_scores_communication: 10,
-      review_scores_location: 10,
-      review_scores_value: 10,
     },
   });
 
@@ -201,7 +185,7 @@ export function PredictionForm({ roomTypes, responseTimes }: PredictionFormProps
                   <FormField
                     key={name}
                     control={form.control}
-                    name={name}
+                    name={name as keyof PredictionInput}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center"><Icon className="mr-2 h-4 w-4" />{label}</FormLabel>

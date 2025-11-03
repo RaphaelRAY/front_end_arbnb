@@ -29,14 +29,6 @@ export type PredictionInput = {
   amenities_count: number;
   neighbourhood_cleansed: string;
   property_type: string;
-  number_of_reviews: number;
-  review_scores_rating: number;
-  review_scores_accuracy: number;
-  review_scores_cleanliness: number;
-  review_scores_checkin: number;
-  review_scores_communication: number;
-  review_scores_location: number;
-  review_scores_value: number;
 };
 
 export type PredictionResponse = {

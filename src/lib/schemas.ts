@@ -28,14 +28,6 @@ export const predictionSchema = z.object({
   amenities_count: z.coerce.number().int().min(0),
   neighbourhood_cleansed: z.string().min(1, "Neighbourhood is required"),
   property_type: z.string().min(1, "Property type is required"),
-  number_of_reviews: z.coerce.number().int().min(0, "Number of reviews cannot be negative"),
-  review_scores_rating: z.coerce.number().min(0).max(100, "Rating must be between 0 and 100"),
-  review_scores_accuracy: z.coerce.number().min(0).max(10, "Score must be between 0 and 10"),
-  review_scores_cleanliness: z.coerce.number().min(0).max(10, "Score must be between 0 and 10"),
-  review_scores_checkin: z.coerce.number().min(0).max(10, "Score must be between 0 and 10"),
-  review_scores_communication: z.coerce.number().min(0).max(10, "Score must be between 0 and 10"),
-  review_scores_location: z.coerce.number().min(0).max(10, "Score must be between 0 and 10"),
-  review_scores_value: z.coerce.number().min(0).max(10, "Score must be between 0 and 10"),
 });
 
 export type PredictionInput = z.infer<typeof predictionSchema>;
