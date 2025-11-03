@@ -5,6 +5,8 @@ import type { PredictionInput } from '@/lib/schemas';
 import type { PredictionResponse } from '@/lib/types';
 import { PredictionForm } from '@/components/prediction-form';
 import { PredictionResults } from '@/components/prediction-results';
+import { FormProvider, useForm } from 'react-hook-form';
+
 
 const InteractiveMap = dynamic(() => import('@/components/interactive-map').then(mod => mod.InteractiveMap), {
   ssr: false,
