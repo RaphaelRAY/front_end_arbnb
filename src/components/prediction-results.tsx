@@ -34,7 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { LIMEExplanation, PredictionResponse } from '@/lib/types';
+import type { Explanation, PredictionResponse, SHAPExplanation } from '@/lib/types';
 import {
   Building,
   Code,
@@ -45,6 +45,7 @@ import {
   Target,
   User,
 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 interface PredictionResultsProps {
   result: PredictionResponse | null;
@@ -85,10 +86,10 @@ const getGroupIcon = (group: string) => {
   }
 };
 
-const LIMEExplanationDisplay = ({
+const ExplanationDisplay = ({
   explanation,
 }: {
-  explanation: LIMEExplanation;
+  explanation: Explanation;
 }) => {
   const groupedItems = explanation.itens.reduce((acc, item) => {
     (acc[item.grupo] = acc[item.grupo] || []).push(item);
@@ -191,7 +192,7 @@ export function PredictionResults({ result }: PredictionResultsProps) {
                   <Lightbulb className="text-accent" />
                   Análise da Predição
                 </div>
-                {result.explicacao_LIME && (
+                {(result.explicacao_LIME || result.explicacao_SHAP) && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -200,14 +201,25 @@ export function PredictionResults({ result }: PredictionResultsProps) {
                     </AlertDialogTrigger>
                     <AlertDialogContent className="max-w-2xl">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Raw LIME Explanation</AlertDialogTitle>
+                        <AlertDialogTitle>Raw Explanation Data</AlertDialogTitle>
                         <AlertDialogDescription>
-                          The raw JSON output from the LIME explanation model is displayed below.
+                          The raw JSON output from the explanation models is displayed below.
                         </AlertDialogDescription>
-                         <pre className="mt-2 max-h-[400px] overflow-auto rounded-md bg-muted p-4 text-xs text-muted-foreground">
-                          {JSON.stringify(result.explicacao_LIME, null, 2)}
-                        </pre>
                       </AlertDialogHeader>
+                       <div className="mt-2 max-h-[400px] overflow-auto rounded-md bg-muted p-4 text-xs ">
+                        {result.explicacao_LIME && (
+                          <>
+                            <h3 className='font-bold mb-2'>LIME</h3>
+                            <pre className='text-muted-foreground'>{JSON.stringify(result.explicacao_LIME, null, 2)}</pre>
+                          </>
+                        )}
+                        {result.explicacao_SHAP && (
+                           <>
+                             <h3 className='font-bold mt-4 mb-2'>SHAP</h3>
+                             <pre className='text-muted-foreground'>{JSON.stringify(result.explicacao_SHAP, null, 2)}</pre>
+                           </>
+                         )}
+                       </div>
                       <AlertDialogFooter>
                         <AlertDialogAction>Fechar</AlertDialogAction>
                       </AlertDialogFooter>
@@ -271,7 +283,7 @@ export function PredictionResults({ result }: PredictionResultsProps) {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">
-                      Fatores Chave de Preço
+                      Fatores Chave (LIME)
                     </h3>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -288,9 +300,31 @@ export function PredictionResults({ result }: PredictionResultsProps) {
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <LIMEExplanationDisplay explanation={result.explicacao_LIME} />
+                  <ExplanationDisplay explanation={result.explicacao_LIME} />
                 </div>
               )}
+
+              {result.explicacao_SHAP && <Separator />}
+
+              {result.explicacao_SHAP && (
+                <div>
+                   <h3 className="text-lg font-semibold mb-4">
+                      Fatores Chave (SHAP)
+                    </h3>
+                  {'erro' in result.explicacao_SHAP ? (
+                     <Alert variant="destructive">
+                       <AlertTitle>Erro no SHAP</AlertTitle>
+                       <AlertDescription>
+                         {result.explicacao_SHAP.erro}
+                       </AlertDescription>
+                     </Alert>
+                  ) : (
+                    <ExplanationDisplay explanation={result.explicacao_SHAP as Explanation} />
+                  )}
+                </div>
+              )}
+
+
             </CardContent>
           </div>
         </TooltipProvider>

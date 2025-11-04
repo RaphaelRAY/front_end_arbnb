@@ -76,24 +76,19 @@ export default function Home() {
         body: JSON.stringify(predictionData),
       });
 
-      if (!response.ok) {
-        let errorMessage = `An API error occurred: ${response.status} ${response.statusText}`;
-        try {
-            const errorBody = await response.json();
-            if (response.status === 422 && errorBody.detail) {
-              const firstError = errorBody.detail?.[0];
-               if (firstError) {
-                 errorMessage = `Validation Error: ${firstError.loc.join(' -> ')} - ${firstError.msg}`;
-               } else {
-                 errorMessage = 'Unknown validation error occurred.'
-               }
-            } else if (errorBody.detail) {
-               errorMessage = `API Error: ${errorBody.detail}`;
-            } else {
-              errorMessage = `API Error: ${JSON.stringify(errorBody)}`;
-            }
-        } catch (e) {
-          // Ignore if error body parsing fails
+      const apiResult: ApiPredictionResponse = await response.json();
+
+      if (!response.ok || apiResult.status === 'erro') {
+        let errorMessage = apiResult.mensagem || `An API error occurred: ${response.status} ${response.statusText}`;
+        if (response.status === 422 && apiResult.detail) {
+            const firstError = apiResult.detail?.[0];
+             if (firstError) {
+               errorMessage = `Validation Error: ${firstError.loc.join(' -> ')} - ${firstError.msg}`;
+             } else {
+               errorMessage = 'Unknown validation error occurred.'
+             }
+        } else if (apiResult.detail) {
+             errorMessage = `API Error: ${JSON.stringify(apiResult.detail)}`;
         }
 
         toast({
@@ -106,19 +101,21 @@ export default function Home() {
         return;
       }
       
-      const apiResult: ApiPredictionResponse = await response.json();
-      
-      const transformedResult: PredictionResponse = {
-        classe_prevista: apiResult.resultado.classe_prevista,
-        confianca: apiResult.resultado.confianca,
-        probabilidades: Object.entries(apiResult.resultado.probabilidades).reduce((acc, [key, value]) => {
-          acc[key as keyof PredictionResponse['probabilidades']] = parseFloat(value) / 100;
-          return acc;
-        }, {} as PredictionResponse['probabilidades']),
-        explicacao_LIME: apiResult.resultado.explicacao_LIME,
-      };
+      if (apiResult.resultado) {
+        const transformedResult: PredictionResponse = {
+          classe_prevista: apiResult.resultado.classe_prevista,
+          confianca: apiResult.resultado.confianca,
+          probabilidades: Object.entries(apiResult.resultado.probabilidades).reduce((acc, [key, value]) => {
+            acc[key as keyof PredictionResponse['probabilidades']] = parseFloat(value) / 100;
+            return acc;
+          }, {} as PredictionResponse['probabilidades']),
+          explicacao_LIME: apiResult.resultado.explicacao_LIME,
+          explicacao_SHAP: apiResult.resultado.explicacao_SHAP,
+        };
 
-      setPredictionResult(transformedResult);
+        setPredictionResult(transformedResult);
+      }
+
 
     } catch (error) {
       let errorMessage = "An unknown error occurred.";

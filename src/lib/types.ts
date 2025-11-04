@@ -42,8 +42,8 @@ export type PredictionInput = {
   property_type: string;
 };
 
-// This represents a single item in the LIME explanation
-export type LIMEExplanationItem = {
+// This represents a single item in the LIME or SHAP explanation
+export type ExplanationItem = {
   feature: string;
   rotulo: string;
   grupo: string;
@@ -53,25 +53,30 @@ export type LIMEExplanationItem = {
   valor_referencia?: number | string;
 };
 
-// This represents the LIME explanation object from the API
-export type LIMEExplanation = {
-  itens: LIMEExplanationItem[];
+// This represents the LIME or SHAP explanation object from the API
+export type Explanation = {
+  itens: ExplanationItem[];
   cobertura_pct: number;
 };
 
+export type SHAPExplanation = Explanation | { erro: string };
+
 // This is the raw response from the Python API
 export type ApiPredictionResponse = {
-  status: string;
-  resultado: {
+  status: 'ok' | 'erro';
+  resultado?: {
     classe_prevista: 'baixo' | 'medio' | 'luxo';
     confianca: string;
-    explicacao_LIME: LIMEExplanation;
+    explicacao_LIME: Explanation;
+    explicacao_SHAP: SHAPExplanation;
     probabilidades: {
       baixo: string;
       medio: string;
       luxo: string;
     };
   };
+  mensagem?: string;
+  detail?: any;
 };
 
 // This is the transformed response that the frontend components will use
@@ -83,5 +88,6 @@ export type PredictionResponse = {
     medio: number;
     luxo: number;
   };
-  explicacao_LIME: LIMEExplanation;
+  explicacao_LIME: Explanation;
+  explicacao_SHAP: SHAPExplanation;
 };
